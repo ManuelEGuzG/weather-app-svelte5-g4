@@ -1,13 +1,11 @@
 /* Fuentes distintivas — no Inter, no Roboto, no Arial.
-   Fraunces es una serif moderna y expresiva; Outfit es una sans geométrica refinada. */
+   Fraunces: serif moderna y expresiva.
+   Outfit: sans geométrica refinada. */
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,200;9..144,400;9..144,500;9..144,600&family=Outfit:wght@300;400;500;600;700&display=swap');
 
 :root {
-  /* Paleta nocturna cálida (cielo de medianoche con tono ámbar de acento) */
-  --bg-start: #1a1a2e;
-  --bg-end: #16213e;
   --text: #f5f5f7;
-  --text-soft: rgba(245, 245, 247, 0.65);
+  --text-soft: rgba(245, 245, 247, 0.7);
   --accent: #ffb84d;
   --accent-strong: #ffa726;
 
@@ -23,27 +21,27 @@ html, body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
+  background: #1a1a2e; /* fallback antes de que cargue el tema */
 }
 
 body {
   font-family: var(--font-body);
   color: var(--text);
-  background:
-    radial-gradient(ellipse at top, var(--bg-end) 0%, var(--bg-start) 70%);
-  background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.5;
+  overflow-x: hidden;
 }
 
-/* Pequeña capa de "ruido" sutil para textura, evita el look plano "AI slop" */
+/* Capa de ruido sutil global (textura, evita el look plano) */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 0;
-  opacity: 0.025;
+  z-index: 2;
+  opacity: 0.03;
+  mix-blend-mode: overlay;
   background-image:
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
@@ -52,7 +50,6 @@ button {
   font-family: inherit;
 }
 
-/* Accesibilidad: respeta prefers-reduced-motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
