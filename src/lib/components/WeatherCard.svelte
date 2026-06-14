@@ -2,7 +2,6 @@
   let { weather } = $props();
 
   // Reloj local que se actualiza cada minuto.
-  // $state inicial + $effect con setInterval.
   let now = $state(Date.now());
 
   $effect(() => {
@@ -23,30 +22,27 @@
   );
 
   /**
-   * Hora local de la ciudad: combinamos el "now" actual del navegador
-   * con el offset de timezone que envía la API.
+   * Hora y fecha local de la ciudad calculada correctamente usando UTC puro
+   * más el desfase (offset) de segundos entregado por OpenWeatherMap.
    */
-  const localTime = $derived.by(() => {
-    const local = new Date(now + weather.timezone * 1000 - new Date().getTimezoneOffset() * 60000 * 0);
-    // Trabajamos en UTC y le sumamos el offset manualmente para evitar
-    // que el navegador re-aplique su propia timezone.
-    const utc = now;
-    const cityTime = new Date(utc + weather.timezone * 1000);
-    return formatTime(cityTime);
+  const cityDateObj = $derived.by(() => {
+    // Calculamos los milisegundos en UTC actuales y sumamos el offset de la ciudad
+    const localUtcMillis = now + (new Date().getTimezoneOffset() * 60000);
+    return new Date(localUtcMillis + (weather.timezone * 1000));
   });
 
-  const localDate = $derived.by(() => {
-    const cityTime = new Date(now + weather.timezone * 1000);
-    return formatDate(cityTime);
+  const localTime = $derived(formatTime(cityDateObj));
+  const localDate = $derived(formatDate(cityDateObj));
+
+  const sunriseStr = $derived.by(() => {
+    const localUtcMillis = (weather.sunrise * 1000) + (new Date().getTimezoneOffset() * 60000);
+    return formatTime(new Date(localUtcMillis + (weather.timezone * 1000)));
   });
 
-  const sunriseStr = $derived(
-    formatTime(new Date((weather.sunrise + weather.timezone) * 1000))
-  );
-
-  const sunsetStr = $derived(
-    formatTime(new Date((weather.sunset + weather.timezone) * 1000))
-  );
+  const sunsetStr = $derived.by(() => {
+    const localUtcMillis = (weather.sunset * 1000) + (new Date().getTimezoneOffset() * 60000);
+    return formatTime(new Date(localUtcMillis + (weather.timezone * 1000)));
+  });
 
   // Visibilidad en km, con un decimal.
   const visibilityKm = $derived((weather.visibility / 1000).toFixed(1));
@@ -55,9 +51,8 @@
   const windDir = $derived(degreesToCardinal(weather.windDeg));
 
   function formatTime(date) {
-    // Usamos getUTC* porque ya aplicamos el offset manualmente arriba.
-    const h = String(date.getUTCHours()).padStart(2, '0');
-    const m = String(date.getUTCMinutes()).padStart(2, '0');
+    const h = String(date.getHours()).padStart(2, '0');
+    const m = String(date.getMinutes()).padStart(2, '0');
     return `${h}:${m}`;
   }
 
@@ -65,7 +60,7 @@
     const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
     const months = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
                    'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-    return `${days[date.getUTCDay()]}, ${date.getUTCDate()} de ${months[date.getUTCMonth()]}`;
+    return `${days[date.getDay()]} ${date.getDate()}, ${months[date.getMonth()]}`;
   }
 
   function degreesToCardinal(deg) {
@@ -75,7 +70,6 @@
 </script>
 
 <article class="card">
-  <!-- Cabecera: ciudad + hora local -->
   <header class="card-header">
     <div class="location">
       <h2>{fullName}</h2>
@@ -87,139 +81,116 @@
     </div>
   </header>
 
-  <!-- Hero: temperatura + icono -->
   <div class="hero">
     <div class="temp-block">
       <div class="temperature">
-        <span class="temp-value">{weather.temperature}</span>
+        <span class="temp-value">{Math.round(weather.temperature)}</span>
         <span class="temp-unit">°C</span>
       </div>
       <p class="description">{descriptionCap}</p>
       <p class="feels-like">
-        Sensación térmica: <strong>{weather.feelsLike}°C</strong>
+        Sensación térmica: <strong>{Math.round(weather.feelsLike)}°C</strong>
       </p>
       <p class="minmax">
-        <span class="up">↑ {weather.tempMax}°</span>
-        <span class="down">↓ {weather.tempMin}°</span>
+        <span class="up">↑ {Math.round(weather.tempMax)}°</span>
+        <span class="down">↓ {Math.round(weather.tempMin)}°</span>
       </p>
     </div>
-    <img
-      src={weather.iconUrl}
-      alt={weather.description}
-      class="icon"
-      width="160"
-      height="160"
-    />
+    <div class="icon-container">
+      <img
+        src={weather.iconUrl}
+        alt={weather.description}
+        class="icon"
+        width="160"
+        height="160"
+      />
+    </div>
   </div>
 
-  <!-- Detalles en grid -->
-  <div class="details">
-    <div class="detail">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z" />
-      </svg>
-      <div>
+  <div class="details-grid">
+    <div class="detail-box">
+      <div class="detail-icon-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z" />
+        </svg>
         <span class="detail-label">Humedad</span>
-        <span class="detail-value">{weather.humidity}%</span>
       </div>
+      <span class="detail-value">{weather.humidity}%</span>
     </div>
 
-    <div class="detail">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2" />
-      </svg>
-      <div>
+    <div class="detail-box">
+      <div class="detail-icon-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2" />
+        </svg>
         <span class="detail-label">Viento</span>
-        <span class="detail-value">{weather.windSpeed} m/s · {windDir}</span>
       </div>
+      <span class="detail-value">{weather.windSpeed} <span class="unit">m/s</span> · <span class="dir">{windDir}</span></span>
     </div>
 
-    <div class="detail">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <circle cx="12" cy="12" r="10" />
-        <line x1="12" y1="6" x2="12" y2="12" />
-        <line x1="12" y1="12" x2="16" y2="14" />
-      </svg>
-      <div>
+    <div class="detail-box">
+      <div class="detail-icon-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="6" x2="12" y2="12" />
+          <line x1="12" y1="12" x2="16" y2="14" />
+        </svg>
         <span class="detail-label">Presión</span>
-        <span class="detail-value">{weather.pressure} hPa</span>
       </div>
+      <span class="detail-value">{weather.pressure} <span class="unit">hPa</span></span>
     </div>
 
-    <div class="detail">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-        <circle cx="12" cy="12" r="3" />
-      </svg>
-      <div>
+    <div class="detail-box">
+      <div class="detail-icon-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+          <circle cx="12" cy="12" r="3" />
+        </svg>
         <span class="detail-label">Visibilidad</span>
-        <span class="detail-value">{visibilityKm} km</span>
       </div>
+      <span class="detail-value">{visibilityKm} <span class="unit">km</span></span>
     </div>
 
-    <div class="detail sunrise">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M17 18a5 5 0 0 0-10 0" />
-        <line x1="12" y1="2" x2="12" y2="9" />
-        <line x1="4.22" y1="10.22" x2="5.64" y2="11.64" />
-        <line x1="1" y1="18" x2="3" y2="18" />
-        <line x1="21" y1="18" x2="23" y2="18" />
-        <line x1="18.36" y1="11.64" x2="19.78" y2="10.22" />
-        <line x1="23" y1="22" x2="1" y2="22" />
-        <polyline points="8 6 12 2 16 6" />
-      </svg>
-      <div>
+    <div class="detail-box sun-rise">
+      <div class="detail-icon-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M17 18a5 5 0 0 0-10 0" />
+          <line x1="12" y1="2" x2="12" y2="9" />
+          <polyline points="8 6 12 2 16 6" />
+        </svg>
         <span class="detail-label">Amanecer</span>
-        <span class="detail-value">{sunriseStr}</span>
       </div>
+      <span class="detail-value">{sunriseStr}</span>
     </div>
 
-    <div class="detail sunset">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M17 18a5 5 0 0 0-10 0" />
-        <line x1="12" y1="9" x2="12" y2="2" />
-        <line x1="4.22" y1="10.22" x2="5.64" y2="11.64" />
-        <line x1="1" y1="18" x2="3" y2="18" />
-        <line x1="21" y1="18" x2="23" y2="18" />
-        <line x1="18.36" y1="11.64" x2="19.78" y2="10.22" />
-        <line x1="23" y1="22" x2="1" y2="22" />
-        <polyline points="16 5 12 9 8 5" />
-      </svg>
-      <div>
+    <div class="detail-box sun-set">
+      <div class="detail-icon-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M17 18a5 5 0 0 0-10 0" />
+          <line x1="12" y1="9" x2="12" y2="2" />
+          <polyline points="16 5 12 9 8 5" />
+        </svg>
         <span class="detail-label">Atardecer</span>
-        <span class="detail-value">{sunsetStr}</span>
       </div>
+      <span class="detail-value">{sunsetStr}</span>
     </div>
   </div>
 </article>
 
 <style>
+  /* --- Contenedor de la Tarjeta --- */
   .card {
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.14) 0%,
-      rgba(255, 255, 255, 0.05) 100%
-    );
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    border-radius: 28px;
-    padding: 2rem;
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    box-shadow:
-      0 20px 60px rgba(0, 0, 0, 0.35),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    animation: fadeUp 0.5s cubic-bezier(0.21, 1, 0.32, 1);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 24px;
+    padding: 2.25rem;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   @keyframes fadeUp {
-    from {
-      opacity: 0;
-      transform: translateY(16px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   /* --- Cabecera --- */
@@ -227,185 +198,221 @@
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: 1rem;
-    margin-bottom: 0.5rem;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
   }
 
   .location h2 {
-    font-family: var(--font-display);
-    font-size: clamp(1.5rem, 4.5vw, 2.125rem);
-    font-weight: 500;
-    margin: 0 0 0.25rem 0;
+    font-size: clamp(1.6rem, 5vw, 2.25rem);
+    font-weight: 700;
+    margin: 0 0 0.35rem 0;
     letter-spacing: -0.02em;
-    line-height: 1.1;
+    line-height: 1.15;
+    background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
   .local-date {
     margin: 0;
     color: var(--text-soft);
     font-size: 0.85rem;
-    text-transform: capitalize;
+    font-weight: 500;
   }
 
   .local-time {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    text-align: right;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.5rem 0.85rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
   }
 
   .time-value {
-    font-family: var(--font-display);
-    font-size: 1.5rem;
-    font-weight: 500;
-    color: var(--accent);
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--text-main);
     line-height: 1;
     font-variant-numeric: tabular-nums;
   }
 
   .time-label {
-    font-size: 0.7rem;
+    font-size: 0.6rem;
     text-transform: uppercase;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.08em;
     color: var(--text-soft);
     margin-top: 0.25rem;
+    font-weight: 600;
   }
 
-  /* --- Hero --- */
+  /* --- Hero Principal --- */
   .hero {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 1rem;
-    margin: 0.5rem 0 1.5rem;
+    gap: 2rem;
+    margin-bottom: 2.25rem;
   }
 
   .temp-block {
     flex: 1;
-    min-width: 0;
   }
 
   .temperature {
     display: flex;
     align-items: flex-start;
-    gap: 0.25rem;
   }
 
   .temp-value {
-    font-family: var(--font-display);
-    font-size: clamp(4.5rem, 16vw, 7rem);
-    font-weight: 200;
-    line-height: 1;
+    font-size: clamp(4.5rem, 15vw, 6.5rem);
+    font-weight: 800;
+    line-height: 0.9;
     letter-spacing: -0.04em;
-    background: linear-gradient(135deg, var(--accent) 0%, #ffd28d 100%);
+    background: linear-gradient(180deg, #ffffff 30%, rgba(255, 255, 255, 0.7) 100%);
     -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    -webkit-text-fill-color: transparent;
   }
 
   .temp-unit {
-    font-family: var(--font-display);
-    font-size: clamp(1.5rem, 4vw, 2rem);
-    font-weight: 300;
-    margin-top: 0.75rem;
+    font-size: clamp(1.5rem, 4vw, 2.25rem);
+    font-weight: 400;
     color: var(--text-soft);
+    margin-left: 0.15rem;
   }
 
   .description {
-    margin: 0;
-    color: var(--text);
-    font-size: 1.05rem;
-    font-weight: 500;
+    margin: 0.5rem 0 0 0;
+    color: #ffffff;
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
   }
 
   .feels-like {
-    margin: 0.375rem 0 0.25rem 0;
+    margin: 0.4rem 0;
     color: var(--text-soft);
     font-size: 0.9rem;
   }
 
   .feels-like strong {
-    color: var(--text);
-    font-weight: 500;
+    color: #ffffff;
+    font-weight: 600;
   }
 
   .minmax {
     display: flex;
-    gap: 0.875rem;
-    margin: 0.5rem 0 0 0;
+    gap: 1rem;
+    margin: 0;
     font-size: 0.95rem;
+    font-weight: 600;
     font-variant-numeric: tabular-nums;
   }
 
-  .minmax .up { color: #ff9966; }
-  .minmax .down { color: #7ec8ff; }
+  .minmax .up { color: #f97316; }
+  .minmax .down { color: #38bdf8; }
 
-  .icon {
-    width: 160px;
-    height: 160px;
-    object-fit: contain;
-    filter: drop-shadow(0 12px 32px rgba(255, 184, 77, 0.4));
-    margin: -1.5rem -1rem -1.5rem 0;
-    flex-shrink: 0;
-  }
-
-  /* --- Detalles --- */
-  .details {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem 1.25rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
-  }
-
-  .detail {
+  /* Animación sutil de respiración en el icono */
+  .icon-container {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 0.875rem;
+    justify-content: center;
   }
 
-  .detail svg {
-    width: 22px;
-    height: 22px;
-    color: var(--accent);
-    flex-shrink: 0;
+  .icon {
+    width: 150px;
+    height: 150px;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 24px rgba(255, 255, 255, 0.15));
+    animation: pulseIcon 4s ease-in-out infinite;
   }
 
-  .sunrise svg { color: #ffaa6b; }
-  .sunset svg { color: #d990ff; }
+  @keyframes pulseIcon {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  /* --- Grid Estilo Bento --- */
+  .details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.85rem;
+  }
+
+  .detail-box {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 0.75rem;
+    transition: background 0.3s ease, border-color 0.3s ease;
+  }
+
+  .detail-box:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .detail-icon-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .detail-icon-title svg {
+    width: 18px;
+    height: 18px;
+    color: var(--text-soft);
+  }
 
   .detail-label {
-    display: block;
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
+    font-size: 0.75rem;
+    font-weight: 600;
     color: var(--text-soft);
-    margin-bottom: 0.125rem;
+    letter-spacing: 0.02em;
   }
 
   .detail-value {
-    display: block;
-    font-size: 1rem;
-    font-weight: 500;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #ffffff;
     font-variant-numeric: tabular-nums;
+    line-height: 1.1;
   }
 
-  /* --- Responsive --- */
-  @media (max-width: 520px) {
-    .card { padding: 1.5rem; border-radius: 22px; }
-    .icon {
-      width: 110px;
-      height: 110px;
-      margin: -1rem -0.5rem -1rem 0;
-    }
-    .details {
-      grid-template-columns: 1fr 1fr;
-      gap: 0.875rem 1rem;
-    }
+  .detail-value .unit {
+    font-size: 0.9rem;
+    color: var(--text-soft);
+    font-weight: 500;
   }
 
-  @media (max-width: 380px) {
-    .card-header { flex-direction: column; gap: 0.5rem; }
-    .local-time { align-items: flex-start; text-align: left; flex-direction: row; gap: 0.5rem; align-items: baseline; }
+  .detail-value .dir {
+    font-size: 1rem;
+    color: var(--accent);
+  }
+
+  /* Variaciones de Color de Iconos */
+  .sun-rise svg { color: #fb923c !important; }
+  .sun-set svg { color: #c084fc !important; }
+
+  /* --- Ajustes Responsivos --- */
+  @media (max-width: 540px) {
+    .card { padding: 1.5rem; border-radius: 20px; }
+    .hero { gap: 1rem; }
+    .icon { width: 110px; height: 110px; }
+    .details-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .detail-box { padding: 0.85rem 1rem; }
+    .detail-value { font-size: 1.15rem; }
+  }
+
+  @media (max-width: 400px) {
+    .card-header { flex-direction: column; align-items: stretch; gap: 1rem; }
+    .local-time { align-items: center; }
+    .details-grid { grid-template-columns: 1fr; } /* Columna única en móviles pequeños */
   }
 </style>

@@ -11,18 +11,12 @@
   let highlightedIndex = $state(-1);
   let loadingSuggestions = $state(false);
 
-  // --- $derived: hay resultados que mostrar? ---
+  // --- $derived: ¿hay resultados que mostrar? ---
   const hasSuggestions = $derived(suggestions.length > 0);
 
   /**
-   * $effect con CLEANUP FUNCTION — característica clave de Svelte 5.
-   *
-   * Cada vez que `query` cambia, se ejecuta este efecto. La función
-   * que retorna se ejecuta ANTES del próximo run o al desmontar el componente,
-   * lo que nos permite implementar debounce + cancelación de fetch.
-   *
-   * Patrón clásico que en React necesitaría useEffect + AbortController + cleanup,
-   * aquí queda en 15 líneas idiomáticas.
+   * $effect con CLEANUP FUNCTION — reactividad nativa de Svelte 5.
+   * Maneja el debounce de la entrada del usuario y cancela peticiones previas si cambia la query.
    */
   $effect(() => {
     const trimmed = query.trim();
@@ -37,7 +31,7 @@
     loadingSuggestions = true;
     const controller = new AbortController();
 
-    // Debounce de 300ms: solo dispara el fetch si el usuario deja de teclear.
+    // Debounce de 300ms
     const timer = setTimeout(async () => {
       try {
         const results = await searchCities(trimmed, controller.signal);
@@ -53,8 +47,7 @@
       }
     }, 300);
 
-    // CLEANUP: cancela el timer y el fetch si query cambia antes.
-    // Esto evita race conditions y peticiones obsoletas.
+    // CLEANUP: Evita race conditions y peticiones innecesarias al servidor
     return () => {
       clearTimeout(timer);
       controller.abort();
@@ -88,24 +81,21 @@
     event.preventDefault();
     if (!query.trim() || disabled) return;
 
-    // Si hay sugerencias y una está resaltada, úsala.
     if (highlightedIndex >= 0 && suggestions[highlightedIndex]) {
       selectSuggestion(suggestions[highlightedIndex]);
       return;
     }
-    // Si hay sugerencias pero ninguna resaltada, usar la primera.
     if (suggestions.length > 0) {
       selectSuggestion(suggestions[0]);
       return;
     }
-    // Fallback: buscar por nombre directo.
     onSearchName(query);
     query = '';
     isOpen = false;
   }
 
   /**
-   * Navegación por teclado para accesibilidad.
+   * Accesibilidad: Navegación completa por teclado
    */
   function handleKeydown(event) {
     if (!isOpen || suggestions.length === 0) return;
@@ -124,14 +114,10 @@
   }
 </script>
 
-<!--
-  use:clickOutside es una ACCIÓN SVELTE personalizada.
-  Cierra el dropdown cuando el usuario hace click fuera del componente.
--->
 <div class="search-wrap" use:clickOutside={handleClose}>
   <form class="search" onsubmit={handleSubmit} role="search">
     <div class="input-wrap">
-      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <circle cx="11" cy="11" r="7" />
         <line x1="21" y1="21" x2="16.65" y2="16.65" />
       </svg>
@@ -177,7 +163,7 @@
             role="option"
             aria-selected={index === highlightedIndex}
           >
-            <svg class="pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <svg class="pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
               <circle cx="12" cy="10" r="3" />
             </svg>
@@ -202,7 +188,7 @@
 
   .search {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.65rem;
     width: 100%;
   }
 
@@ -215,25 +201,27 @@
 
   .search-icon {
     position: absolute;
-    left: 1rem;
+    left: 1.15rem;
     width: 18px;
     height: 18px;
     color: var(--text-soft);
     pointer-events: none;
   }
 
+  /* --- Input Estilo Cristalizado --- */
   input {
     width: 100%;
-    padding: 0.875rem 2.75rem 0.875rem 2.875rem;
-    font-family: var(--font-body);
+    padding: 0.875rem 2.75rem 0.875rem 3rem;
     font-size: 1rem;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    border-radius: 14px;
-    color: var(--text);
-    transition: all 0.2s ease;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    color: var(--text-main, #ffffff);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
   }
 
   input::placeholder {
@@ -243,47 +231,51 @@
   input:focus {
     outline: none;
     border-color: var(--accent);
-    background: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 0 0 4px rgba(255, 184, 77, 0.18);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05), 
+                0 4px 20px -2px rgba(0, 0, 0, 0.2);
   }
 
   input:disabled {
-    opacity: 0.5;
+    opacity: 0.4;
     cursor: not-allowed;
   }
 
+  /* --- Mini Spinner --- */
   .mini-spinner {
     position: absolute;
-    right: 0.875rem;
+    right: 1.15rem;
     width: 16px;
     height: 16px;
-    border: 2px solid rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.1);
     border-top-color: var(--accent);
     border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+    animation: spin 0.6s linear infinite;
   }
 
   @keyframes spin {
     to { transform: rotate(360deg); }
   }
 
+  /* --- Botón de Envío Dinámico --- */
   button[type="submit"] {
     padding: 0 1.5rem;
-    font-family: var(--font-body);
-    font-weight: 600;
+    font-weight: 700;
     font-size: 0.95rem;
-    background: var(--accent);
-    color: #1a1a2e;
+    background: #ffffff;
+    color: #0f172a; /* Contraste oscuro e impecable */
     border: none;
-    border-radius: 14px;
+    border-radius: 16px;
     cursor: pointer;
-    transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
 
   button[type="submit"]:hover:not(:disabled) {
-    background: var(--accent-strong);
+    background: var(--accent);
+    color: #ffffff;
     transform: translateY(-1px);
-    box-shadow: 0 8px 24px rgba(255, 184, 77, 0.35);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
   }
 
   button[type="submit"]:active:not(:disabled) {
@@ -291,95 +283,113 @@
   }
 
   button[type="submit"]:disabled {
-    opacity: 0.5;
+    opacity: 0.4;
     cursor: not-allowed;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-soft);
+    box-shadow: none;
   }
 
+  /* --- Desplegable Autocompletado Glassmorphism --- */
   .suggestions {
     position: absolute;
-    top: calc(100% + 0.5rem);
+    top: calc(100% + 0.6rem);
     left: 0;
     right: 0;
     list-style: none;
-    padding: 0.375rem;
+    padding: 0.5rem;
     margin: 0;
-    background: rgba(26, 26, 46, 0.92);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 14px;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    background: rgba(15, 23, 42, 0.45); /* Fondo adaptado a la oscuridad translucida */
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5),
+                inset 0 1px 1px rgba(255, 255, 255, 0.05);
     z-index: 50;
-    animation: dropIn 0.18s ease-out;
+    animation: dropIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   @keyframes dropIn {
-    from { opacity: 0; transform: translateY(-6px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(-8px) scale(0.99); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
   }
 
   .suggestions li {
     margin: 0;
   }
 
+  /* --- Botón de Sugerencia Individual --- */
   .suggestion {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.85rem;
     width: 100%;
-    padding: 0.75rem 0.875rem;
+    padding: 0.8rem 1rem;
     background: transparent;
     border: none;
-    border-radius: 10px;
-    color: var(--text);
+    border-radius: 12px;
+    color: var(--text-main, #ffffff);
     text-align: left;
     cursor: pointer;
-    font-family: var(--font-body);
-    transition: background 0.15s ease;
+    transition: all 0.15s ease;
   }
 
   .suggestion:hover,
   .suggestion.highlighted {
-    background: rgba(255, 184, 77, 0.15);
+    background: rgba(255, 255, 255, 0.06);
+    outline: none;
+  }
+
+  .suggestion:hover .pin,
+  .suggestion.highlighted .pin {
+    color: var(--accent);
+    transform: scale(1.1);
   }
 
   .pin {
-    width: 18px;
-    height: 18px;
-    color: var(--accent);
+    width: 16px;
+    height: 16px;
+    color: var(--text-soft);
     flex-shrink: 0;
+    transition: all 0.15s ease;
   }
 
   .suggestion-text {
     display: flex;
     flex-direction: column;
-    gap: 0.125rem;
+    gap: 0.15rem;
     flex: 1;
     min-width: 0;
   }
 
   .suggestion-name {
     font-size: 0.95rem;
-    font-weight: 500;
+    font-weight: 600;
   }
 
   .suggestion-region {
     font-size: 0.8rem;
     color: var(--text-soft);
+    font-weight: 500;
   }
 
-  /* En móviles ocultamos el texto del botón para ganar espacio */
+  /* --- Modificaciones en Móviles --- */
   @media (max-width: 480px) {
     button[type="submit"] span {
       display: none;
     }
     button[type="submit"] {
-      padding: 0 1.125rem;
+      padding: 0 1.25rem;
     }
     button[type="submit"]::after {
       content: '→';
-      font-size: 1.25rem;
-      font-weight: 600;
+      font-size: 1.35rem;
+      font-weight: 700;
+    }
+    .suggestions {
+      border-radius: 16px;
+      padding: 0.4rem;
     }
   }
 </style>

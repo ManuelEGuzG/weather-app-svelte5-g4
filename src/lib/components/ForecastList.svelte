@@ -5,81 +5,104 @@
 
   function dayLabel(date, index) {
     if (index === 0) return 'Mañana';
-    return DAYS_SHORT[date.getUTCDay()];
+    return DAYS_SHORT[date.getDay()]; // getDay local es más seguro si la API ya procesó la fecha
   }
 
   function shortDate(date) {
-    return `${date.getUTCDate()}/${date.getUTCMonth() + 1}`;
+    return `${date.getDate()}/${date.getMonth() + 1}`;
   }
 </script>
 
 <section class="forecast" aria-label="Pronóstico de los próximos 5 días">
   <h3>Próximos 5 días</h3>
-  <ul class="forecast-grid">
-    {#each forecast as day, i (day.dayKey)}
-      <li class="day-card" style="animation-delay: {i * 60}ms">
-        <span class="day-name">{dayLabel(day.date, i)}</span>
-        <span class="day-date">{shortDate(day.date)}</span>
-        <img
-          src={day.iconUrl}
-          alt={day.description}
-          class="day-icon"
-          width="56"
-          height="56"
-        />
-        <span class="day-temp">
-          <span class="day-max">{day.tempMax}°</span>
-          <span class="day-min">{day.tempMin}°</span>
-        </span>
-      </li>
-    {/each}
-  </ul>
+  
+  <div class="forecast-scroll-container">
+    <ul class="forecast-grid">
+      {#each forecast as day, i (day.dayKey || i)}
+        <li class="day-card" style="animation-delay: {i * 60}ms">
+          <span class="day-name">{dayLabel(day.date, i)}</span>
+          <span class="day-date">{shortDate(day.date)}</span>
+          
+          <div class="icon-wrapper">
+            <img
+              src={day.iconUrl}
+              alt={day.description}
+              class="day-icon"
+              width="56"
+              height="56"
+            />
+          </div>
+          
+          <div class="day-temp">
+            <span class="day-max">{Math.round(day.tempMax)}°</span>
+            <span class="day-min">{Math.round(day.tempMin)}°</span>
+          </div>
+        </li>
+      {/each}
+    </ul>
+  </div>
 </section>
 
 <style>
   .forecast {
-    margin-top: 2rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
   }
 
   h3 {
-    font-family: var(--font-body);
     font-size: 0.75rem;
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.12em;
     color: var(--text-soft);
-    margin: 0 0 0.875rem 0;
+    margin: 0 0 1rem 0;
   }
 
+  /* --- Contenedor de Scroll Inteligente --- */
+  .forecast-scroll-container {
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none; /* Oculta scrollbar en Firefox */
+    -webkit-overflow-scrolling: touch;
+    padding: 0.25rem 0; /* Espacio para que el efecto hover no se corte */
+  }
+
+  .forecast-scroll-container::-webkit-scrollbar {
+    display: none; /* Oculta scrollbar en Chrome/Safari */
+  }
+
+  /* --- Grid Bento --- */
   .forecast-grid {
     list-style: none;
     padding: 0;
     margin: 0;
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 0.5rem;
+    gap: 0.65rem;
   }
 
+  /* --- Tarjeta Individual de Día --- */
   .day-card {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.25rem;
-    padding: 0.875rem 0.5rem;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    gap: 0.35rem;
+    padding: 1rem 0.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 18px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     opacity: 0;
-    animation: fadeUpStagger 0.4s ease-out forwards;
+    animation: fadeUpStagger 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.02);
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
   }
 
   @keyframes fadeUpStagger {
     from {
       opacity: 0;
-      transform: translateY(10px);
+      transform: translateY(12px);
     }
     to {
       opacity: 1;
@@ -87,62 +110,99 @@
     }
   }
 
+  /* Hover adaptativo con la variable global del clima */
   .day-card:hover {
-    background: rgba(255, 184, 77, 0.1);
-    border-color: rgba(255, 184, 77, 0.4);
-    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--accent);
+    transform: translateY(-2px);
   }
 
   .day-name {
     font-size: 0.75rem;
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--text);
+    letter-spacing: 0.04em;
+    color: var(--text-main, #ffffff);
   }
 
   .day-date {
     font-size: 0.7rem;
     color: var(--text-soft);
+    font-weight: 500;
     font-variant-numeric: tabular-nums;
   }
 
-  .day-icon {
-    width: 56px;
-    height: 56px;
-    object-fit: contain;
-    margin: -0.25rem 0;
-    filter: drop-shadow(0 4px 12px rgba(255, 184, 77, 0.2));
+  .icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 50px;
+    margin: 0.15rem 0;
   }
 
+  .day-icon {
+    width: 52px;
+    height: 52px;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.15));
+    transition: transform 0.2s ease;
+  }
+
+  .day-card:hover .day-icon {
+    transform: scale(1.08);
+  }
+
+  /* --- Bloque de Temperatura --- */
   .day-temp {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.125rem;
+    gap: 0.15rem;
     font-variant-numeric: tabular-nums;
+    margin-top: 0.15rem;
   }
 
   .day-max {
     font-size: 1.05rem;
-    font-weight: 600;
-    color: #ff9966;
+    font-weight: 700;
+    color: #ffffff; /* Blanco limpio para unificar la estética bento */
     line-height: 1;
   }
 
   .day-min {
     font-size: 0.85rem;
-    color: #7ec8ff;
+    font-weight: 500;
+    color: var(--text-soft);
     line-height: 1;
   }
 
-  /* En pantallas pequeñas pasamos a scroll horizontal para no apretar tanto */
-  @media (max-width: 480px) {
+  /* --- Ajustes Responsivos Móviles --- */
+  @media (max-width: 580px) {
+    /* Forzar scroll horizontal fluido en pantallas compactas sin romper columnas */
     .forecast-grid {
-      grid-template-columns: repeat(5, minmax(72px, 1fr));
+      display: flex;
+      gap: 0.6rem;
     }
-    .day-card { padding: 0.75rem 0.25rem; }
-    .day-icon { width: 48px; height: 48px; }
-    .day-name { font-size: 0.7rem; }
+    
+    .day-card {
+      flex: 0 0 calc(20% - 0.5rem);
+      min-width: 78px;
+      padding: 0.85rem 0.35rem;
+      border-radius: 14px;
+    }
+
+    .day-max { font-size: 1rem; }
+    .day-min { font-size: 0.8rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .day-card {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+    .day-card:hover .day-icon {
+      transform: none;
+    }
   }
 </style>

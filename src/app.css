@@ -4,55 +4,131 @@
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,200;9..144,400;9..144,500;9..144,600&family=Outfit:wght@300;400;500;600;700&display=swap');
 
 :root {
-  --text: #f5f5f7;
-  --text-soft: rgba(245, 245, 247, 0.7);
-  --accent: #ffb84d;
-  --accent-strong: #ffa726;
-
+  /* --- TIPOGRAFÍAS --- */
   --font-display: 'Fraunces', Georgia, serif;
   --font-body: 'Outfit', system-ui, sans-serif;
+
+  /* --- COLORES BASE POR DEFECTO (DESPEJADO / DÍA) --- */
+  --text-main: #ffffff;
+  --text-soft: rgba(255, 255, 255, 0.65);
+  --accent: #f59e0b; /* Ambar cálido */
+  --accent-strong: #d97706;
+  
+  /* Gradiente de fondo dinámico */
+  --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #3b82f6 100%);
+  
+  /* Posición de los orbes decorativos de luz */
+  --orb-1-color: rgba(245, 158, 11, 0.2);
+  --orb-2-color: rgba(59, 130, 246, 0.3);
 }
 
+/* --- CLASES DE TEMAS DINÁMICOS PARA EL BODY --- */
+
+/* Tormenta / Lluvia Intensa */
+body.theme-thunderstorm, body.theme-rain {
+  --accent: #38bdf8; /* Azul eléctrico vivo */
+  --accent-strong: #0284c7;
+  --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #334155 100%);
+  --orb-1-color: rgba(56, 189, 248, 0.15);
+  --orb-2-color: rgba(148, 163, 184, 0.1);
+}
+
+/* Nieve / Frío Extremo */
+body.theme-snow {
+  --accent: #93c5fd; /* Azul hielo */
+  --accent-strong: #3b82f6;
+  --bg-gradient: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
+  --orb-1-color: rgba(255, 255, 255, 0.1);
+  --orb-2-color: rgba(147, 197, 253, 0.15);
+}
+
+/* Nublado / Niebla / Atmósfera Pesada */
+body.theme-clouds, body.theme-mist {
+  --accent: #a1a1aa; /* Gris platino pulido */
+  --accent-strong: #71717a;
+  --bg-gradient: linear-gradient(135deg, #090d16 0%, #111827 50%, #1f2937 100%);
+  --orb-1-color: rgba(161, 161, 170, 0.12);
+  --orb-2-color: rgba(31, 41, 55, 0.4);
+}
+
+/* Despejado / Noche */
+body.theme-clear-night {
+  --accent: #f1f5f9; /* Platino estelar */
+  --accent-strong: #cbd5e1;
+  --bg-gradient: linear-gradient(135deg, #020617 0%, #0f172a 70%, #1e293b 100%);
+  --orb-1-color: rgba(99, 102, 241, 0.15);
+  --orb-2-color: rgba(15, 23, 42, 0.5);
+}
+
+/* --- RECONSTRUCCIÓN DEL LIENZO --- */
 * {
   box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 html, body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  background: #1a1a2e; /* fallback antes de que cargue el tema */
 }
 
 body {
   font-family: var(--font-body);
-  color: var(--text);
+  color: var(--text-main);
+  background: var(--bg-gradient);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.5;
   overflow-x: hidden;
+  position: relative;
+  transition: background 0.8s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-/* Capa de ruido sutil global (textura, evita el look plano) */
+/* --- EFECTOS AMBIENTALES INMERSIVOS --- */
+
+/* Capa de ruido sutil global (textura que unifica el cristal) */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 2;
-  opacity: 0.03;
+  z-index: 10;
+  opacity: 0.025;
   mix-blend-mode: overlay;
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-button {
+/* Orbes Boreales de Fondo de Luz que reaccionan al tema */
+body::after {
+  content: '';
+  position: fixed;
+  top: -10%;
+  left: -10%;
+  width: 120vw;
+  height: 120vh;
+  z-index: -1;
+  pointer-events: none;
+  background: 
+    radial-gradient(circle at 20% 30%, var(--orb-1-color) 0%, transparent 45%),
+    radial-gradient(circle at 80% 70%, var(--orb-2-color) 0%, transparent 50%);
+  filter: blur(60px);
+  transition: background 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+button, input {
   font-family: inherit;
+  color: inherit;
 }
 
+/* --- ACCESIBILIDAD MÍNIMA REQUERIDA --- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
