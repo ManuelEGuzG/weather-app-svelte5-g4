@@ -2,9 +2,9 @@
 
 Aplicación web del clima construida con **Svelte 5** que consume la API gratuita de [OpenWeatherMap](https://openweathermap.org/api). Proyecto académico del curso *Investigación Aplicada en Frameworks (IF-7102)* — Grupo G4.
 
-🔗 **Demo en vivo:** _<inserta aquí la URL de Vercel cuando despliegues>_
+🔗 **Vercel:** _<https://weather-app-svelte5-g4-vercel-fouqx9vjo-g4-svelte.vercel.app>_
 
-📦 **Repositorio:** _<inserta aquí la URL de tu repo>_
+📦 **Repositorio:** _<https://github.com/ManuelEGuzG/weather-app-svelte5-g4.git>_
 
 ---
 
