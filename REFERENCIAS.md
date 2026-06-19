@@ -31,24 +31,6 @@ Fuentes consultadas para la implementación de esta aplicación. Mínimo 8 fuent
 **Tipo:** Documentación oficial
 **Uso:** Manejo seguro de la API Key mediante variables de entorno con prefijo `VITE_` y archivos `.env`.
 
----
-
-## Artículos técnicos (3)
-
-### 6. Rich Harris — "Introducing the new Svelte CLI"
-**URL:** https://svelte.dev/blog/sv-the-svelte-cli
-**Tipo:** Blog oficial del equipo de Svelte
-**Uso:** Explicación de la migración del antiguo `npm create svelte@latest` al nuevo `npx sv create`, y su unificación con `svelte-add` y `svelte-migrate`.
-
-### 7. Roberto Butti — "Creating your first Svelte 5 reactive component"
-**URL:** https://dev.to/robertobutti/my-first-svelte5-reactive-component-5elc
-**Tipo:** Artículo técnico (DEV Community)
-**Uso:** Tutorial paso a paso de cómo declarar reactividad con `$state` en Svelte 5 y diferencias prácticas con `let` de Svelte 4.
-
-### 8. MDN Web Docs — Web Storage API (`localStorage`)
-**URL:** https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage
-**Tipo:** Documentación de referencia (Mozilla)
-**Uso:** Implementación de la persistencia del historial de búsquedas, manejo de errores (cuota llena, modo privado) y serialización con `JSON.stringify` / `JSON.parse`.
 
 ---
 
@@ -71,7 +53,6 @@ Fuentes consultadas para la implementación de esta aplicación. Mínimo 8 fuent
 | Categoría | Cantidad |
 |-----------|----------|
 | Documentación oficial | 5 |
-| Artículos técnicos | 3 |
 | Videos y recursos complementarios | 2 |
 | **Total** | **10** |
 
