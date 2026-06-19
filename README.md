@@ -4,6 +4,8 @@ Aplicación web del clima construida con **Svelte 5** que consume la API gratuit
 
 🔗 **Vercel:** _<https://weather-app-svelte5-g4-vercel-fouqx9vjo-g4-svelte.vercel.app>_
 
+🔗 **Clima:** _<https://weather-app-svelte5-g4-vercel.vercel.app>_
+
 📦 **Repositorio:** _<https://github.com/ManuelEGuzG/weather-app-svelte5-g4.git>_
 
 ---
