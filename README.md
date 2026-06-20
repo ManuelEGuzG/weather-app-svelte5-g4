@@ -259,7 +259,7 @@ weather-app-svelte5-g4/
 ├── README.md
 └── REFERENCIAS.md
 ```
-```
+
 
 ### Decisiones arquitectónicas
 
@@ -274,20 +274,20 @@ weather-app-svelte5-g4/
 
 ### ✅ Pros
 
-- **Reactividad explícita y granular** con runes: ya no hay que adivinar qué reactividad disparan los signos `$:` de Svelte 4.
-- **Sin Virtual DOM:** el compilador genera código JS imperativo que actualiza el DOM directamente. Resultado: bundles más pequeños y rendimiento más rápido que React/Vue en muchos benchmarks.
-- **Sintaxis cercana a HTML/JS estándar:** la curva de aprendizaje es suave para quien ya sabe JS.
-- **Runes fuera de componentes** (archivos `.svelte.js`): permite stores reactivos sin librerías adicionales.
-- **Bundle muy pequeño:** este proyecto pesa ~45 KB de JS sin gzip (~17 KB gzipped), incluyendo todo el framework.
+- **Reactividad explícita y granular** con runes: ya no hay que adivinar qué reactividad disparan los signos `$:` de Svelte 4; el código declara intención, no heurísticas del compilador.
+- **Sin Virtual DOM:** el compilador traduce el código a JavaScript optimizado en tiempo de build, en lugar de comparar árboles en memoria en el navegador. Esto reduce el trabajo en tiempo de ejecución y mejora el rendimiento percibido frente a frameworks basados en Virtual DOM ([Web Reactiva](https://www.webreactiva.com/blog/svelte-vs-react), [Rootstack](https://rootstack.com/es/blog/svelte-vs-react-pros-contras-y-casos-de-uso)).
+- **Sintaxis cercana a HTML/JS estándar:** menos boilerplate que React, lo que facilita la curva de aprendizaje para quien ya domina JS, HTML y CSS ([Rootstack](https://rootstack.com/es/blog/svelte-vs-react-pros-contras-y-casos-de-uso)).
+- **Runes fuera de componentes** (archivos `.svelte.js`): permite stores reactivos sin librerías adicionales como `svelte/store`.
+- **Bundle reducido:** menos dependencias en tiempo de ejecución que frameworks con Virtual DOM, lo que se traduce en aplicaciones más livianas ([Rootstack](https://rootstack.com/es/blog/svelte-vs-react-pros-contras-y-casos-de-uso)).
 - **CSS con scope automático** por componente — no hace falta CSS Modules ni styled-components.
 
 ### ⚠️ Contras
 
-- **Ecosistema más pequeño** que React: menos librerías de terceros, menos preguntas en Stack Overflow.
-- **Pocas vacantes laborales** comparado con React.
-- **Cambio mayor entre Svelte 4 y Svelte 5:** las runes son una nueva forma de pensar; mucho contenido en internet aún muestra la sintaxis antigua.
-- **Herramientas de debugging menos maduras** (Svelte DevTools existe pero no es tan robusto como React DevTools).
-- **TypeScript con runes** todavía pulido (mejora cada release).
+- **Ecosistema más pequeño** que React: menos librerías de terceros y menor cantidad de recursos/comunidad disponible para resolver dudas ([Rootstack](https://rootstack.com/es/blog/svelte-vs-react-pros-contras-y-casos-de-uso)).
+- **Pocas vacantes laborales** comparado con React, cuya adopción en el mercado sigue siendo ampliamente mayor ([Web Reactiva](https://www.webreactiva.com/blog/svelte-vs-react)).
+- **Cambio mayor entre Svelte 4 y Svelte 5:** las runes son una nueva forma de pensar la reactividad; mucho contenido y tutoriales en internet aún muestran la sintaxis antigua (`$:`, `export let`).
+- **Herramientas de debugging menos maduras:** Svelte DevTools existe, pero no es tan robusto como React DevTools.
+- **TypeScript con runes todavía en pulido:** mejora con cada release, pero la integración no es tan madura como en ecosistemas más establecidos.
 
 ---
 
@@ -314,3 +314,7 @@ Grupo **G4** — Investigación Aplicada en Frameworks IF-7102
 ## Licencia
 
 MIT — uso académico libre.
+
+## Referencias
+
+Ver [REFERENCIAS.md](./REFERENCIAS.md) para el listado completo de fuentes consultadas.
