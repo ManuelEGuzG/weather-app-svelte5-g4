@@ -42,15 +42,39 @@ Todas las funcionalidades requeridas por la rúbrica están implementadas:
 
 ## Capturas de pantalla
 
-> _Agrega aquí 2-3 capturas:_
->
-> 1. `screenshots/desktop.png` — vista de escritorio con un clima cargado.
-> 2. `screenshots/mobile.png` — vista móvil.
-> 3. `screenshots/error.png` — manejo de error de ciudad inexistente.
+### Vista de escritorio
 
-```markdown
-![Desktop](./screenshots/desktop.png)
-![Mobile](./screenshots/mobile.png)
+![Vista principal - escritorio](./screenshots/PCVercel1.png)
+![Detalle del clima](./screenshots/PCVercel2.png)
+![Pronóstico extendido - escritorio](./screenshots/PCVercel3.png)
+![Vista general - escritorio](./screenshots/PCVercel4.png)
+
+### Historial de búsquedas
+
+![Historial de búsquedas - escritorio](./screenshots/PCVercelHistorial.png)
+![Historial de búsquedas - escritorio (variante)](./screenshots/PCVerselHistorial.png)
+
+### Vista móvil
+
+![Vista principal - móvil](./screenshots/Movil1.jpeg)
+![Detalle del clima - móvil](./screenshots/movil2.jpeg)
+![Pronóstico extendido - móvil](./screenshots/Movil3.jpeg)
+
+### Historial de búsquedas - móvil
+
+![Historial - móvil](./screenshots/MovilHistorial.jpeg)
+![Historial - móvil (variante)](./screenshots/MovilHistorial2.jpeg)
+![Historial - móvil (variante)](./screenshots/MovilHistorial3.jpeg)
+
+### Manejo de errores
+
+![Error: ciudad no encontrada - escritorio](./screenshots/PCErrorCiudad.png)
+![Error: ciudad no encontrada - escritorio (variante)](./screenshots/PCErrorCiudad2.png)
+![Error: API Key inválida - entorno local](./screenshots/PCLocalErrorAPI.png)
+![Error: ciudad no encontrada - móvil](./screenshots/MovilNoCiudad.jpeg)
+![Error: ciudad no encontrada - móvil (variante)](./screenshots/MovilNoCiudad2.jpeg)
+
+
 ```
 
 ---
@@ -187,30 +211,54 @@ En el dashboard de Vercel, ve a tu proyecto → **Settings** → **Environment V
 weather-app-svelte5-g4/
 ├── public/
 │   └── vite.svg                        # Favicon
+├── screenshots/                         # Capturas de pantalla para la documentación
+│   ├── PCVercel1.png                    # Vista de escritorio - clima cargado 
+│   ├── PCVercel2.png                    # Vista de escritorio - detalle de datos del clima
+│   ├── PCVercel3.png                    # Vista de escritorio - pronóstico extendido
+│   ├── PCVercel4.png                    # Vista de escritorio 
+│   ├── PCVercelHistorial.png            # Historial de búsquedas en escritorio
+│   ├── PCVerselHistorial.png            # Historial de búsquedas 
+│   ├── PCErrorCiudad.png                # Error: ciudad no encontrada (escritorio)
+│   ├── PCErrorCiudad2.png               # Error: ciudad no encontrada (escritorio)
+│   ├── PCLocalErrorAPI.png              # Error: API Key inválida (entorno local)
+│   ├── Movil1.jpeg                      # Vista móvil - clima cargado
+│   ├── movil2.jpeg                      # Vista móvil - detalle del clima
+│   ├── Movil3.jpeg                      # Vista móvil - pronóstico extendido
+│   ├── MovilHistorial.jpeg              # Historial de búsquedas en móvil
+│   ├── MovilHistorial2.jpeg             # Historial de búsquedas en móvil
+│   ├── MovilHistorial3.jpeg             # Historial de búsquedas en móvil 
+│   ├── MovilNoCiudad.jpeg               # Error: ciudad no encontrada (móvil)
+│   └── MovilNoCiudad2.jpeg              # Error: ciudad no encontrada (móvil)
 ├── src/
 │   ├── lib/
+│   │   ├── actions/
+│   │   │   └── clickOutside.js         # Utilidad para detectar clics fuera de un componente
 │   │   ├── components/
 │   │   │   ├── SearchBar.svelte        # Input + botón de búsqueda
-│   │   │   ├── WeatherCard.svelte      # Tarjeta con datos del clima
-│   │   │   ├── SearchHistory.svelte    # Chips del historial
-│   │   │   ├── LoadingSpinner.svelte   # Indicador de carga
-│   │   │   └── ErrorMessage.svelte     # Mensaje de error
+│   │   │   ├── WeatherCard.svelte      # Tarjeta con datos del clima actual
+│   │   │   ├── ForecastList.svelte     # Lista con el pronóstico extendido
+│   │   │   ├── SearchHistory.svelte    # Chips del historial de ciudades
+│   │   │   ├── LoadingSpinner.svelte   # Indicador visual de carga
+│   │   │   └── ErrorMessage.svelte     # Visualización de mensajes de error
 │   │   ├── stores/
-│   │   │   └── weather.svelte.js       # Store global con runes
+│   │   │   └── weather.svelte.js       # Store global reactivo con runes
 │   │   └── services/
-│   │       └── weatherApi.js           # Cliente HTTP de OpenWeatherMap
-│   ├── App.svelte                      # Componente raíz
-│   ├── app.css                         # Estilos globales
-│   └── main.js                         # Punto de entrada
-├── .env.example                        # Plantilla de variables de entorno
+│   │       └── weatherApi.js           # Cliente HTTP para OpenWeatherMap
+│   ├── App.svelte                      # Componente principal raíz
+│   ├── app.css                         # Estilos CSS globales de la aplicación
+│   └── main.js                         # Punto de entrada y montaje de la app
+├── .env                                 # Variables de entorno locales (NO se sube al repo)
+├── .env.example                        # Plantilla para la configuración local de la API Key
 ├── .gitignore
 ├── index.html
 ├── package.json
-├── svelte.config.js                    # Habilita modo runes
-├── vite.config.js
-├── vercel.json                         # Config de Vercel (SPA rewrites)
+├── package-lock.json
+├── svelte.config.js                    # Configuración del compilador de Svelte
+├── vite.config.js                      # Configuración de empaquetado con Vite
+├── vercel.json                         # Configuración de redirecciones para SPA en Vercel
 ├── README.md
 └── REFERENCIAS.md
+```
 ```
 
 ### Decisiones arquitectónicas
@@ -257,7 +305,11 @@ weather-app-svelte5-g4/
 
 Grupo **G4** — Investigación Aplicada en Frameworks IF-7102
 
-> _Agreguen aquí los nombres de los integrantes._
+* Manuel Guzmán
+* Aaron Salazar 
+* Brayan Reyes 
+* Deiby Ruiz
+* Maria(Tatiana) Jimenez
 
 ## Licencia
 
