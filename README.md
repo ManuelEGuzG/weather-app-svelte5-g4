@@ -309,7 +309,7 @@ Grupo **G4** — Investigación Aplicada en Frameworks IF-7102
 * Aaron Salazar 
 * Brayan Reyes 
 * Deiby Ruiz
-* Maria(Tatiana) Jimenez
+* Tatiana Jimenez
 
 ## Licencia
 
