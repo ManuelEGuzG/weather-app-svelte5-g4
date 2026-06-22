@@ -1,6 +1,6 @@
 # Weather App · Svelte 5 (G4)
 
-Aplicación web del clima construida con **Svelte 5** que consume la API gratuita de [OpenWeatherMap](https://openweathermap.org/api). Proyecto académico del curso *Investigación Aplicada en Frameworks (IF-7102)* — Grupo G4.
+Aplicación web del clima construida con **Svelte 5** que consume la API gratuita de [OpenWeatherMap](https://openweathermap.org/api). Proyecto académico del curso _Investigación Aplicada en Frameworks (IF-7102)_ — Grupo G4.
 
 🔗 **Vercel:** _<https://weather-app-svelte5-g4-vercel-fouqx9vjo-g4-svelte.vercel.app>_
 
@@ -74,8 +74,7 @@ Todas las funcionalidades requeridas por la rúbrica están implementadas:
 ![Error: ciudad no encontrada - móvil](./screenshots/MovilNoCiudad.jpeg)
 ![Error: ciudad no encontrada - móvil (variante)](./screenshots/MovilNoCiudad2.jpeg)
 
-
-```
+````
 
 ---
 
@@ -100,21 +99,25 @@ Declara variables cuyos cambios disparan re-renders automáticos.
 ```js
 let currentWeather = $state(null);
 let loading = $state(false);
-```
+````
 
 Usado en `src/lib/stores/weather.svelte.js` y `src/lib/components/SearchBar.svelte`.
 
 ### `$derived` — Valores computados
+
 Calcula un valor a partir de otro estado reactivo. Se recalcula automáticamente cuando cambia su dependencia.
 
 ```js
 const hasHistory = $derived(history.length > 0);
-const fullName = $derived(weather.country ? `${weather.city}, ${weather.country}` : weather.city);
+const fullName = $derived(
+  weather.country ? `${weather.city}, ${weather.country}` : weather.city,
+);
 ```
 
 Usado en `weather.svelte.js` y `WeatherCard.svelte`.
 
 ### `$effect` y `$effect.root` — Efectos secundarios
+
 Ejecuta código cuando cambia una dependencia reactiva. `$effect.root` permite usar efectos fuera del ciclo de vida de un componente.
 
 ```js
@@ -128,6 +131,7 @@ $effect.root(() => {
 Persiste el historial en `localStorage` cada vez que cambia.
 
 ### `$props` — Recepción de props
+
 Reemplaza al antiguo `export let prop` de Svelte 4. Permite destructuración y valores por defecto.
 
 ```js
@@ -137,12 +141,15 @@ let { onSearch, disabled = false } = $props();
 Usado en todos los componentes hijos.
 
 ### Archivos `.svelte.js`
+
 Permite usar runes **fuera** de un componente `.svelte`. Esto habilita stores reactivos sin necesidad de librerías externas como `svelte/store`.
 
 ### Bloques de control
+
 Se usa la sintaxis idiomática de Svelte: `{#if}`, `{:else if}`, `{:else}`, `{/if}`, `{#each ... as ... (key)}`. Estos bloques son compilados a código JS imperativo eficiente.
 
 ### Nueva API de montaje
+
 Svelte 5 reemplaza `new App({ target })` por `mount(App, { target })`. Ver `src/main.js`.
 
 ---
@@ -181,7 +188,7 @@ La app quedará disponible en `http://localhost:5173`.
 
 La API Key **no está incluida** en el repositorio por seguridad. Cada persona debe obtener la suya:
 
-1. Crea una cuenta gratuita en https://openweathermap.org/users/sign_up
+1. Crea una cuenta gratuita en https://openweathermap.org/
 2. Inicia sesión y entra a **API keys** en tu perfil: https://home.openweathermap.org/api_keys
 3. Copia tu key (puede tardar hasta 2 horas en activarse tras crear la cuenta).
 4. En la raíz del proyecto, copia el archivo `.env.example` a `.env`:
@@ -199,6 +206,7 @@ La API Key **no está incluida** en el repositorio por seguridad. Cada persona d
 ### Configuración en Vercel
 
 En el dashboard de Vercel, ve a tu proyecto → **Settings** → **Environment Variables** y agrega:
+
 - **Name:** `VITE_OPENWEATHER_API_KEY`
 - **Value:** _tu API key_
 - **Environments:** Production, Preview, Development
@@ -212,12 +220,12 @@ weather-app-svelte5-g4/
 ├── public/
 │   └── vite.svg                        # Favicon
 ├── screenshots/                         # Capturas de pantalla para la documentación
-│   ├── PCVercel1.png                    # Vista de escritorio - clima cargado 
+│   ├── PCVercel1.png                    # Vista de escritorio - clima cargado
 │   ├── PCVercel2.png                    # Vista de escritorio - detalle de datos del clima
 │   ├── PCVercel3.png                    # Vista de escritorio - pronóstico extendido
-│   ├── PCVercel4.png                    # Vista de escritorio 
+│   ├── PCVercel4.png                    # Vista de escritorio
 │   ├── PCVercelHistorial.png            # Historial de búsquedas en escritorio
-│   ├── PCVerselHistorial.png            # Historial de búsquedas 
+│   ├── PCVerselHistorial.png            # Historial de búsquedas
 │   ├── PCErrorCiudad.png                # Error: ciudad no encontrada (escritorio)
 │   ├── PCErrorCiudad2.png               # Error: ciudad no encontrada (escritorio)
 │   ├── PCLocalErrorAPI.png              # Error: API Key inválida (entorno local)
@@ -226,7 +234,7 @@ weather-app-svelte5-g4/
 │   ├── Movil3.jpeg                      # Vista móvil - pronóstico extendido
 │   ├── MovilHistorial.jpeg              # Historial de búsquedas en móvil
 │   ├── MovilHistorial2.jpeg             # Historial de búsquedas en móvil
-│   ├── MovilHistorial3.jpeg             # Historial de búsquedas en móvil 
+│   ├── MovilHistorial3.jpeg             # Historial de búsquedas en móvil
 │   ├── MovilNoCiudad.jpeg               # Error: ciudad no encontrada (móvil)
 │   └── MovilNoCiudad2.jpeg              # Error: ciudad no encontrada (móvil)
 ├── src/
@@ -260,7 +268,6 @@ weather-app-svelte5-g4/
 └── REFERENCIAS.md
 ```
 
-
 ### Decisiones arquitectónicas
 
 - **Store separado del componente:** `weather.svelte.js` encapsula toda la lógica de estado y persistencia. Los componentes solo consumen sus getters.
@@ -293,10 +300,10 @@ weather-app-svelte5-g4/
 
 ## Scripts disponibles
 
-| Comando | Descripción |
-|---------|-------------|
-| `npm run dev` | Inicia el servidor de desarrollo en `localhost:5173` con HMR. |
-| `npm run build` | Genera build de producción en `dist/`. |
+| Comando           | Descripción                                                                |
+| ----------------- | -------------------------------------------------------------------------- |
+| `npm run dev`     | Inicia el servidor de desarrollo en `localhost:5173` con HMR.              |
+| `npm run build`   | Genera build de producción en `dist/`.                                     |
 | `npm run preview` | Sirve localmente el build de producción para verificar antes de desplegar. |
 
 ---
@@ -305,11 +312,11 @@ weather-app-svelte5-g4/
 
 Grupo **G4** — Investigación Aplicada en Frameworks IF-7102
 
-* Manuel Guzmán
-* Aaron Salazar 
-* Brayan Reyes 
-* Deiby Ruiz
-* Tatiana Jimenez
+- Manuel Guzmán
+- Aaron Salazar
+- Brayan Reyes
+- Deiby Ruiz
+- Tatiana Jimenez
 
 ## Licencia
 
